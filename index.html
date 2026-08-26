@@ -314,7 +314,7 @@
       padding: 40px;
       color: #888;
     }
-
+ 
     /* Coaching Modal */
     .modal-overlay {
       position: fixed;
@@ -421,7 +421,7 @@
       font-family: inherit;
     }
     .modal-skip:hover { color: #111; }
-
+ 
     @media (max-width: 480px) {
       .stats-grid { grid-template-columns: 1fr; }
       .category-name { width: 80px; font-size: 11px; }
@@ -431,30 +431,30 @@
   </style>
 </head>
 <body>
-
+ 
 <div class="app-container">
   <div class="app-header">
     <h1>Ask me anything</h1>
     <p>Submit your question for Wednesday's live session</p>
   </div>
-
+ 
   <div class="tabs">
     <button class="tab active" onclick="switchTab('submit')">Ask a question</button>
     <button class="tab" onclick="switchTab('admin')">Coach dashboard</button>
   </div>
-
+ 
   <!-- SUBMIT TAB -->
   <div id="panel-submit" class="panel active">
     <div class="card">
       <p style="font-size: 14px; color: #666; margin: 0 0 16px 0;">
         Drop your question below. I go live every Wednesday to answer the most requested topics on relationships, mindset, and spirituality.
       </p>
-
+ 
       <div class="form-group">
         <label class="form-label">Your name (optional)</label>
         <input type="text" class="form-input" id="sub-name" placeholder="Anonymous">
       </div>
-
+ 
       <div class="form-group">
         <label class="form-label">Category</label>
         <select class="form-select" id="sub-category">
@@ -468,24 +468,24 @@
           <option value="other">Other</option>
         </select>
       </div>
-
+ 
       <div class="form-group">
         <label class="form-label">Your question</label>
         <textarea class="form-textarea" id="sub-text" placeholder="What would you like me to address on the live?"></textarea>
       </div>
-
+ 
       <button class="btn btn-primary" id="submit-btn" onclick="handleSubmitClick()" style="width: 100%;">
         Submit question
       </button>
     </div>
-
+ 
     <div class="card" style="text-align: center;">
       <p style="font-size: 13px; color: #aaa; margin: 0;">
         Questions are anonymous. I review all submissions before Wednesday's live.
       </p>
     </div>
   </div>
-
+ 
   <!-- ADMIN TAB -->
   <div id="panel-admin" class="panel">
     <div id="admin-gate" class="admin-gate">
@@ -498,7 +498,7 @@
       <button class="btn btn-primary" onclick="checkPin()">Unlock</button>
       <p style="font-size: 12px; color: #aaa; margin-top: 12px;">Default PIN: 1234</p>
     </div>
-
+ 
     <div id="admin-content" style="display: none;">
       <div class="stats-grid">
         <div class="stat-card">
@@ -518,12 +518,12 @@
           <div class="stat-label">Top 20 ready</div>
         </div>
       </div>
-
+ 
       <div class="card">
         <h3 class="card-title">Category breakdown</h3>
         <div id="category-bars"></div>
       </div>
-
+ 
       <div class="card">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
           <h3 class="card-title" style="margin: 0;">Top 20 for live session</h3>
@@ -531,7 +531,7 @@
         </div>
         <div id="top20-list"></div>
       </div>
-
+ 
       <div class="card">
         <h3 class="card-title">All submissions</h3>
         <div class="filter-bar" id="filter-bar">
@@ -547,7 +547,7 @@
         </div>
         <div id="questions-list"></div>
       </div>
-
+ 
       <div class="card">
         <h3 class="card-title">Export data</h3>
         <textarea class="export-area" id="export-area" readonly></textarea>
@@ -559,7 +559,7 @@
     </div>
   </div>
 </div>
-
+ 
 <!-- Coaching Offer Modal -->
 <div class="modal-overlay" id="coaching-modal">
   <div class="modal-box">
@@ -595,9 +595,9 @@
     </div>
   </div>
 </div>
-
+ 
 <div class="toast" id="toast">Action completed</div>
-
+ 
 <script>
   // ═══════════════════════════════════════════════════════════════
   //  YOUR SUPABASE CREDENTIALS — ALREADY PLUGGED IN
@@ -605,11 +605,11 @@
   const SUPABASE_URL = 'https://epeilizyegpjffsrgve.supabase.co';
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVwZWlsaXp5ZWdncGpmZnNyZ3ZlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc2ODQ1NDUsImV4cCI6MjEwMzI2MDU0NX0.E6OIKpe9sejFEQX6PiMwsosoaxsHZ39jTqGMW9nI1G4';
   // ═══════════════════════════════════════════════════════════════
-
+ 
   const ADMIN_PIN = '1234';
   const WHATSAPP_NUMBER = '254756602016';
   const COACHING_CATEGORIES = ['relationships', 'mental-health', 'family'];
-
+ 
   const CATEGORIES = {
     relationships: { label: 'Relationships', color: '#c44' },
     mindset: { label: 'Mindset', color: '#36c' },
@@ -620,14 +620,14 @@
     'mental-health': { label: 'Mental health', color: '#c00' },
     other: { label: 'Other', color: '#999' }
   };
-
+ 
   // ── State ──
   let supabase = null;
   let allQuestions = [];
   let realtimeSub = null;
   let pendingQuestion = null;
   let countdownInterval = null;
-
+ 
   function initSupabase() {
     try {
       supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -638,7 +638,7 @@
       return null;
     }
   }
-
+ 
   // ── Data layer ──
   async function fetchQuestions() {
     if (!supabase) return [];
@@ -650,32 +650,32 @@
     allQuestions = data || [];
     return allQuestions;
   }
-
+ 
   async function insertQuestion(q) {
     if (!supabase) return null;
     const { data, error } = await supabase.from('questions').insert([q]).select().single();
     if (error) { console.error(error); showToast('Error saving question'); return null; }
     return data;
   }
-
+ 
   async function updateVotes(id, votes) {
     if (!supabase) return;
     const { error } = await supabase.from('questions').update({ votes }).eq('id', id);
     if (error) console.error(error);
   }
-
+ 
   async function deleteQuestionDb(id) {
     if (!supabase) return;
     const { error } = await supabase.from('questions').delete().eq('id', id);
     if (error) { console.error(error); showToast('Error deleting'); }
   }
-
+ 
   async function clearAllDb() {
     if (!supabase) return;
     const { error } = await supabase.from('questions').delete().neq('id', 'impossible');
     if (error) { console.error(error); showToast('Error clearing data'); }
   }
-
+ 
   function subscribeToChanges() {
     if (!supabase) return;
     realtimeSub = supabase
@@ -685,7 +685,7 @@
       })
       .subscribe();
   }
-
+ 
   // ── UI helpers ──
   function showToast(msg) {
     const t = document.getElementById('toast');
@@ -693,7 +693,7 @@
     t.classList.add('show');
     setTimeout(() => t.classList.remove('show'), 2500);
   }
-
+ 
   function switchTab(name) {
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
@@ -701,12 +701,12 @@
     document.getElementById('panel-' + name).classList.add('active');
     if (name === 'admin') renderAdmin();
   }
-
+ 
   function formatDate(ts) {
     const d = new Date(ts);
     return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   }
-
+ 
   function isThisWeek(ts) {
     const now = new Date();
     const startOfWeek = new Date(now);
@@ -714,37 +714,37 @@
     startOfWeek.setHours(0, 0, 0, 0);
     return new Date(ts).getTime() >= startOfWeek.getTime();
   }
-
+ 
   function isAdminVisible() {
     return document.getElementById('admin-content').style.display !== 'none';
   }
-
+ 
   // ── Discount / Coaching Offer ──
   function copyDiscountCode() {
     const code = document.getElementById('modal-code').textContent.trim();
     navigator.clipboard.writeText(code).then(() => showToast('Code copied!'));
   }
-
+ 
   function generateDiscountCode() {
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
     let code = '';
     for (let i = 0; i < 6; i++) code += chars.charAt(Math.floor(Math.random() * chars.length));
     return 'AMA-' + code;
   }
-
+ 
   function buildWhatsAppLink(code, expiresAt) {
     const expiryStr = new Date(expiresAt).toLocaleString('en-US', {
       month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
     });
     const text = encodeURIComponent(
       `Hi! I just submitted a question through your Ask Me Anything portal and would love to book a private 1-on-1 coaching session with my 10% discount.
-
+ 
 My discount code is: ${code}
 This offer expires on ${expiryStr}.`
     );
     return `https://wa.me/${WHATSAPP_NUMBER}?text=${text}`;
   }
-
+ 
   function startCountdown(expiresAt) {
     if (countdownInterval) clearInterval(countdownInterval);
     const update = () => {
@@ -763,72 +763,72 @@ This offer expires on ${expiryStr}.`
     update();
     countdownInterval = setInterval(update, 1000);
   }
-
+ 
   function showCoachingModal(q) {
     const code = generateDiscountCode();
     const expiresAt = Date.now() + 12 * 60 * 60 * 1000; // 12 hours
     q.discount_code = code;
     q.discount_expires_at = new Date(expiresAt).toISOString();
     pendingQuestion = q;
-
+ 
     document.getElementById('modal-code').textContent = code;
     document.getElementById('modal-whatsapp-btn').href = buildWhatsAppLink(code, expiresAt);
     startCountdown(expiresAt);
-
+ 
     document.getElementById('coaching-modal').classList.add('show');
     document.body.style.overflow = 'hidden';
   }
-
+ 
   function hideCoachingModal() {
     document.getElementById('coaching-modal').classList.remove('show');
     document.body.style.overflow = '';
     if (countdownInterval) clearInterval(countdownInterval);
   }
-
+ 
   async function skipCoachingOffer() {
     hideCoachingModal();
     await doSubmit(pendingQuestion);
     pendingQuestion = null;
   }
-
+ 
   // ── Submit flow ──
   function handleSubmitClick() {
     const text = document.getElementById('sub-text').value.trim();
     const category = document.getElementById('sub-category').value;
     const name = document.getElementById('sub-name').value.trim() || 'Anonymous';
-
+ 
     if (!text) { showToast('Please enter a question'); return; }
     if (text.length < 10) { showToast('Question is too short'); return; }
-
+ 
     const q = { text, category, name, votes: 0 };
-
+ 
     // If emotional category, show coaching offer first
     if (COACHING_CATEGORIES.includes(category)) {
       showCoachingModal(q);
       return;
     }
-
+ 
     // Otherwise submit directly
     doSubmit(q);
   }
-
+ 
   async function doSubmit(q) {
     const btn = document.getElementById('submit-btn');
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner"></span> Sending...';
-
+ 
     const result = await insertQuestion(q);
-
+ 
     btn.disabled = false;
     btn.textContent = 'Submit question';
-
+ 
     if (result) {
       document.getElementById('sub-text').value = '';
       document.getElementById('sub-name').value = '';
       showToast('Question submitted!');
     }
   }
-
+ 
   // WhatsApp button click also submits the question
   document.getElementById('modal-whatsapp-btn').addEventListener('click', async () => {
     if (pendingQuestion) {
@@ -837,10 +837,10 @@ This offer expires on ${expiryStr}.`
     }
     hideCoachingModal();
   });
-
+ 
   // ── Admin ──
   let currentFilter = 'all';
-
+ 
   function checkPin() {
     const pin = document.getElementById('admin-pin').value;
     if (pin === ADMIN_PIN) {
@@ -851,21 +851,21 @@ This offer expires on ${expiryStr}.`
       showToast('Incorrect PIN');
     }
   }
-
+ 
   async function renderAdmin() {
     const qs = allQuestions.length ? allQuestions : await fetchQuestions();
     const weekQs = qs.filter(q => isThisWeek(q.created_at));
-
+ 
     document.getElementById('stat-total').textContent = qs.length;
     document.getElementById('stat-week').textContent = weekQs.length;
-
+ 
     const cats = new Set(qs.map(q => q.category));
     document.getElementById('stat-categories').textContent = cats.size;
-
+ 
     const catCounts = {};
     qs.forEach(q => { catCounts[q.category] = (catCounts[q.category] || 0) + 1; });
     const maxCount = Math.max(...Object.values(catCounts), 1);
-
+ 
     let barsHtml = '';
     Object.entries(CATEGORIES).forEach(([key, info]) => {
       const count = catCounts[key] || 0;
@@ -873,7 +873,7 @@ This offer expires on ${expiryStr}.`
       barsHtml += `<div class="category-bar"><span class="category-name">${info.label}</span><div class="category-track"><div class="category-fill" style="width: ${pct}%; background: ${info.color};"></div></div><span class="category-count">${count}</span></div>`;
     });
     document.getElementById('category-bars').innerHTML = barsHtml;
-
+ 
     const scored = qs.map(q => {
       const ageDays = (Date.now() - new Date(q.created_at).getTime()) / (1000 * 60 * 60 * 24);
       const recencyScore = Math.max(0, 7 - ageDays) * 2;
@@ -882,7 +882,7 @@ This offer expires on ${expiryStr}.`
     scored.sort((a, b) => b.score - a.score);
     const top20 = scored.slice(0, 20);
     document.getElementById('stat-top20').textContent = top20.length;
-
+ 
     let topHtml = '';
     if (top20.length === 0) {
       topHtml = '<div class="empty-state">No questions yet. Share your link to collect submissions.</div>';
@@ -893,16 +893,16 @@ This offer expires on ${expiryStr}.`
       });
     }
     document.getElementById('top20-list').innerHTML = topHtml;
-
+ 
     renderQuestionsList();
     document.getElementById('export-area').value = JSON.stringify(qs, null, 2);
   }
-
+ 
   function renderQuestionsList() {
     const qs = allQuestions;
     const filtered = currentFilter === 'all' ? qs : qs.filter(q => q.category === currentFilter);
     filtered.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-
+ 
     let html = '';
     if (filtered.length === 0) {
       html = '<div class="empty-state">No questions in this category.</div>';
@@ -913,14 +913,14 @@ This offer expires on ${expiryStr}.`
     }
     document.getElementById('questions-list').innerHTML = html;
   }
-
+ 
   function filterQuestions(cat) {
     currentFilter = cat;
     document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
     event.target.classList.add('active');
     renderQuestionsList();
   }
-
+ 
   async function voteQuestion(id) {
     const qs = allQuestions;
     const q = qs.find(x => x.id === id);
@@ -930,7 +930,7 @@ This offer expires on ${expiryStr}.`
     showToast('Priority boosted');
     renderAdmin();
   }
-
+ 
   async function deleteQuestion(id) {
     if (!confirm('Delete this question?')) return;
     await deleteQuestionDb(id);
@@ -938,7 +938,7 @@ This offer expires on ${expiryStr}.`
     showToast('Question deleted');
     renderAdmin();
   }
-
+ 
   async function exportTop20() {
     const qs = allQuestions;
     const scored = qs.map(q => {
@@ -948,21 +948,17 @@ This offer expires on ${expiryStr}.`
     });
     scored.sort((a, b) => b.score - a.score);
     const top20 = scored.slice(0, 20);
-
-    let text = "🎙️ Wednesday Live — Top 20 Questions
-" + "=".repeat(40) + "
-
-";
-    top20.forEach((q, i) => { text += `${i + 1}. [${CATEGORIES[q.category].label}] ${q.text}
-`; });
-
+ 
+    let text = `🎙️ Wednesday Live — Top 20 Questions\n${"=".repeat(40)}\n\n`;
+    top20.forEach((q, i) => { text += `${i + 1}. [${CATEGORIES[q.category].label}] ${q.text}\n`; });
+ 
     navigator.clipboard.writeText(text).then(() => showToast('Top 20 copied!'));
   }
-
+ 
   function copyExport() {
     navigator.clipboard.writeText(document.getElementById('export-area').value).then(() => showToast('JSON copied!'));
   }
-
+ 
   async function clearAll() {
     if (!confirm('Delete ALL questions? This cannot be undone.')) return;
     await clearAllDb();
@@ -970,21 +966,21 @@ This offer expires on ${expiryStr}.`
     showToast('All data cleared');
     renderAdmin();
   }
-
+ 
   function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
   }
-
+ 
   // ── Init ──
   initSupabase();
   fetchQuestions().then(() => subscribeToChanges());
-
+ 
   document.getElementById('admin-pin')?.addEventListener('keypress', e => {
     if (e.key === 'Enter') checkPin();
   });
-
+ 
   // Close modal on overlay click
   document.getElementById('coaching-modal').addEventListener('click', (e) => {
     if (e.target === document.getElementById('coaching-modal')) {
@@ -992,6 +988,6 @@ This offer expires on ${expiryStr}.`
     }
   });
 </script>
-
+ 
 </body>
 </html>
