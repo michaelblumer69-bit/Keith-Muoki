@@ -1,3 +1,6 @@
+Copy everything inside the code block below and paste it into GitHub as the contents of `index.html`.
+
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -572,7 +575,13 @@
     <p class="modal-body">
       Your question touches on something personal. A private 1-on-1 session might give you the clarity you need.
     </p>
-    <div class="discount-pill" id="modal-code">AMA-XXXXXX</div>
+    <div class="discount-pill" id="modal-code" onclick="copyDiscountCode()" style="cursor: pointer;" title="Tap to copy">
+      AMA-XXXXXX
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;">
+        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+      </svg>
+    </div>
     <div class="countdown" id="modal-countdown">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="12" cy="12" r="10"></circle>
@@ -596,8 +605,8 @@
   // ═══════════════════════════════════════════════════════════════
   //  YOUR SUPABASE CREDENTIALS — ALREADY PLUGGED IN
   // ═══════════════════════════════════════════════════════════════
-  const SUPABASE_URL = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVwZWlsaXp5ZWdncGpmZnNyZ3ZlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc2ODQ1NDUsImV4cCI6MjEwMzI2MDU0NX0.E6OIKpe9sejFEQX6PiMwsosoaxsHZ39jTqGMW9nI1G4';
-  const SUPABASE_ANON_KEY = 'sb_publishable_cVuvB8kU6aQoYmtl-VVPFw_KeeAlW-C';
+  const SUPABASE_URL = 'https://epeilizyegpjffsrgve.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVwZWlsaXp5ZWdncGpmZnNyZ3ZlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc2ODQ1NDUsImV4cCI6MjEwMzI2MDU0NX0.E6OIKpe9sejFEQX6PiMwsosoaxsHZ39jTqGMW9nI1G4';
   // ═══════════════════════════════════════════════════════════════
 
   const ADMIN_PIN = '1234';
@@ -714,6 +723,11 @@
   }
 
   // ── Discount / Coaching Offer ──
+  function copyDiscountCode() {
+    const code = document.getElementById('modal-code').textContent.trim();
+    navigator.clipboard.writeText(code).then(() => showToast('Code copied!'));
+  }
+
   function generateDiscountCode() {
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
     let code = '';
@@ -983,4 +997,4 @@ This offer expires on ${expiryStr}.`
 </script>
 
 </body>
-</html>
+</html>```
