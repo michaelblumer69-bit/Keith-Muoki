@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Coach Dashboard</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23111'/%3E%3Cpath d='M32 14a10 10 0 0 0-10 10v10a10 10 0 0 0 20 0V24a10 10 0 0 0-10-10z' fill='%23fff'/%3E%3Cpath d='M20 30v4a12 12 0 0 0 24 0v-4' stroke='%23fff' stroke-width='3' fill='none' stroke-linecap='round'/%3E%3Cline x1='32' y1='46' x2='32' y2='52' stroke='%23fff' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #fafafa;
+      color: #111;
+      line-height: 1.5;
+    }
+    .app-container {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+    .app-header {
+      text-align: center;
+      margin-bottom: 24px;
+      padding-top: 8px;
+    }
+    .app-header h1 { font-size: 22px; font-weight: 600; margin: 0 0 4px 0; }
+    .app-header p { font-size: 14px; color: #666; margin: 0; }
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    .tab {
+      padding: 10px 18px;
+      font-size: 14px;
+      font-weight: 500;
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      cursor: pointer;
+      color: #666;
+      transition: all 0.15s ease;
+    }
+    .tab:hover { color: #111; }
+    .tab.active { color: #111; border-bottom-color: #111; }
+    .panel { display: none; }
+    .panel.active { display: block; }
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+      border: 1px solid #eee;
+    }
+    .card-title {
+      font-size: 15px;
+      font-weight: 600;
+      margin: 0 0 12px 0;
+    }
+    .form-group { margin-bottom: 16px; }
+    .form-label {
+      display: block;
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 6px;
+    }
+    .form-input, .form-select, .form-textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      font-size: 16px;
+      background: #fff;
+      color: #111;
+      font-family: inherit;
+    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      outline: none;
+      border-color: #111;
+    }
+    .form-textarea { min-height: 120px; resize: vertical; }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.15s ease;
+      font-family: inherit;
+    }
+    .btn-primary { background: #111; color: #fff; }
+    .btn-primary:hover:not(:disabled) { opacity: 0.85; }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-secondary { background: transparent; color: #111; border-color: #ddd; }
+    .btn-secondary:hover { background: #f5f5f5; }
+    .btn-danger { background: #fff0f0; color: #c00; border-color: #fcc; }
+    .btn-whatsapp { background: #25d366; color: #fff; }
+    .btn-whatsapp:hover:not(:disabled) { background: #1ebe57; }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .stat-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 18px;
+      text-align: center;
+      border: 1px solid #eee;
+    }
+    .stat-value {
+      font-size: 32px;
+      font-weight: 600;
+      line-height: 1.1;
+      margin-bottom: 4px;
+    }
+    .stat-label { font-size: 12px; color: #888; }
+    .category-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+    .category-name {
+      font-size: 13px;
+      width: 100px;
+      flex-shrink: 0;
+      color: #666;
+    }
+    .category-track {
+      flex: 1;
+      height: 8px;
+      background: #eee;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .category-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.5s ease;
+    }
+    .category-count {
+      font-size: 13px;
+      width: 28px;
+      text-align: right;
+      color: #888;
+    }
+    .question-item {
+      background: #fff;
+      border: 1px solid #eee;
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 8px;
+      transition: all 0.15s ease;
+    }
+    .question-item:hover { border-color: #ccc; }
+    .question-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 6px;
+    }
+    .question-text { font-size: 14px; line-height: 1.5; margin: 0; flex: 1; }
+    .question-meta {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-top: 8px;
+      flex-wrap: wrap;
+    }
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 500;
+    }
+    .tag-relationships { background: #ffeaea; color: #c44; }
+    .tag-mindset { background: #e8f0ff; color: #36c; }
+    .tag-spirituality { background: #f0e8ff; color: #73c; }
+    .tag-career { background: #e8ffe8; color: #2a2; }
+    .tag-self-improvement { background: #f0f0f0; color: #666; }
+    .tag-family { background: #fff8e8; color: #a80; }
+    .tag-mental-health { background: #ffe8e8; color: #c00; }
+    .tag-other { background: #f5f5f5; color: #999; }
+    .date-label { font-size: 11px; color: #aaa; }
+    .top-question {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      padding: 12px;
+      background: #fff;
+      border: 1px solid #eee;
+      border-radius: 10px;
+      margin-bottom: 8px;
+    }
+    .top-rank {
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      flex-shrink: 0;
+      background: #f5f5f5;
+      color: #666;
+    }
+    .top-rank.gold { background: #fff8e0; color: #b80; }
+    .top-rank.silver { background: #f0f0f0; color: #666; }
+    .top-rank.bronze { background: #ffe8e0; color: #c44; }
+    .top-content { flex: 1; }
+    .top-text { font-size: 14px; margin: 0 0 4px 0; line-height: 1.5; }
+    .top-meta { font-size: 11px; color: #aaa; display: flex; gap: 8px; flex-wrap: wrap; }
+    .filter-bar {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+    .filter-chip {
+      padding: 5px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      border: 1px solid #ddd;
+      background: #fff;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      font-family: inherit;
+    }
+    .filter-chip:hover, .filter-chip.active {
+      background: #111;
+      color: #fff;
+      border-color: #111;
+    }
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: #888;
+    }
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: #111;
+      color: #fff;
+      padding: 12px 24px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 500;
+      z-index: 100;
+      opacity: 0;
+      transition: all 0.3s ease;
+      pointer-events: none;
+    }
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+    .admin-gate {
+      text-align: center;
+      padding: 40px 20px;
+    }
+    .pin-input {
+      width: 220px;
+      text-align: center;
+      letter-spacing: 2px;
+      font-size: 18px;
+      padding: 12px;
+      margin: 16px auto;
+      display: block;
+    }
+    .export-area {
+      width: 100%;
+      min-height: 200px;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      font-size: 12px;
+      font-family: 'SF Mono', Monaco, monospace;
+      background: #f9f9f9;
+      color: #111;
+      resize: vertical;
+    }
+    .action-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+    .spinner {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-radius: 50%;
+      border-top-color: #fff;
+      animation: spin 0.6s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-overlay {
+      text-align: center;
+      padding: 40px;
+      color: #888;
+    }
+
+    /* Coaching Modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.25s ease;
+      padding: 16px;
+    }
+    .modal-overlay.show {
+      opacity: 1;
+      visibility: visible;
+    }
+    .modal-box {
+      background: #fff;
+      border-radius: 16px;
+      padding: 28px;
+      max-width: 420px;
+      width: 100%;
+      transform: translateY(20px) scale(0.96);
+      transition: all 0.25s ease;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+    }
+    .modal-overlay.show .modal-box {
+      transform: translateY(0) scale(1);
+    }
+    .modal-icon {
+      width: 52px;
+      height: 52px;
+      background: #fff8e8;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+    }
+    .modal-icon svg {
+      width: 26px;
+      height: 26px;
+      color: #b80;
+    }
+    .modal-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin: 0 0 8px 0;
+    }
+    .modal-body {
+      font-size: 14px;
+      color: #555;
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+    .modal-body strong { color: #111; }
+    .discount-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #111;
+      color: #fff;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 16px;
+      font-family: 'SF Mono', Monaco, monospace;
+      letter-spacing: 0.5px;
+    }
+    .countdown {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: #c44;
+      margin-bottom: 20px;
+      font-weight: 500;
+    }
+    .countdown svg {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+    }
+    .modal-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .modal-actions .btn {
+      width: 100%;
+      justify-content: center;
+    }
+    .modal-skip {
+      font-size: 13px;
+      color: #888;
+      text-align: center;
+      padding: 8px;
+      cursor: pointer;
+      background: none;
+      border: none;
+      font-family: inherit;
+    }
+    .modal-skip:hover { color: #111; }
+
+    @media (max-width: 480px) {
+      .stats-grid { grid-template-columns: 1fr; }
+      .category-name { width: 80px; font-size: 11px; }
+      .app-header h1 { font-size: 20px; }
+      .modal-box { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="app-container">
+  <div class="app-header">
+    <h1>Coach dashboard</h1>
+    <p>Keith Muoki — Ask Me Anything admin</p>
+  </div>
+
+  <!-- ADMIN -->
+  <div id="panel-admin" class="panel active">
+    <div id="admin-gate" class="admin-gate">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="1.5" style="margin-bottom: 12px;">
+        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+      </svg>
+      <p style="font-size: 14px; color: #666; margin: 0 0 8px 0;">Enter your coach password to access the dashboard</p>
+      <input type="password" class="form-input pin-input" id="admin-pin" placeholder="Password" maxlength="20">
+      <button class="btn btn-primary" onclick="checkPin()">Unlock</button>
+    </div>
+
+    <div id="admin-content" style="display: none;">
+      <div class="card">
+        <h3 class="card-title">Find by discount code</h3>
+        <div style="display: flex; gap: 8px;">
+          <input type="text" class="form-input" id="code-search-input" placeholder="Paste code, e.g. KM-LZ6E4Q" style="flex: 1;" onkeydown="if(event.key==='Enter') searchDiscountCode()">
+          <button class="btn btn-primary" onclick="searchDiscountCode()" style="white-space: nowrap;">Search</button>
+        </div>
+        <div id="code-search-result" style="margin-top: 12px;"></div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value" id="stat-total" style="color: #36c;">0</div>
+          <div class="stat-label">Total questions</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="stat-week" style="color: #2a2;">0</div>
+          <div class="stat-label">This week</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="stat-categories" style="color: #73c;">0</div>
+          <div class="stat-label">Categories</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="stat-top20" style="color: #c44;">0</div>
+          <div class="stat-label">Top 20 ready</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 class="card-title">Category breakdown</h3>
+        <div id="category-bars"></div>
+      </div>
+
+      <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <h3 class="card-title" style="margin: 0;">Top 20 for live session</h3>
+          <button class="btn btn-secondary" onclick="exportTop20()" style="padding: 6px 12px; font-size: 12px;">Copy list</button>
+        </div>
+        <div id="top20-list"></div>
+      </div>
+
+      <div class="card">
+        <h3 class="card-title">All submissions</h3>
+        <div class="filter-bar" id="filter-bar">
+          <button class="filter-chip active" onclick="filterQuestions('all')">All</button>
+          <button class="filter-chip" onclick="filterQuestions('relationships')">Relationships</button>
+          <button class="filter-chip" onclick="filterQuestions('mindset')">Mindset</button>
+          <button class="filter-chip" onclick="filterQuestions('spirituality')">Spirituality</button>
+          <button class="filter-chip" onclick="filterQuestions('career')">Career</button>
+          <button class="filter-chip" onclick="filterQuestions('self-improvement')">Self-imp</button>
+          <button class="filter-chip" onclick="filterQuestions('family')">Family</button>
+          <button class="filter-chip" onclick="filterQuestions('mental-health')">Mental health</button>
+          <button class="filter-chip" onclick="filterQuestions('other')">Other</button>
+        </div>
+        <div id="questions-list"></div>
+      </div>
+
+      <div class="card">
+        <h3 class="card-title">Export data</h3>
+        <textarea class="export-area" id="export-area" readonly></textarea>
+        <div class="action-row">
+          <button class="btn btn-secondary" onclick="copyExport()">Copy JSON</button>
+          <button class="btn btn-danger" onclick="clearAll()">Clear all data</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast">Action completed</div>
+
+<script>
+  // ═══════════════════════════════════════════════════════════════
+  //  YOUR SUPABASE CREDENTIALS — ALREADY PLUGGED IN
+  // ═══════════════════════════════════════════════════════════════
+  const SUPABASE_URL = 'https://epeilizyeggpjffsrgve.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVwZWlsaXp5ZWdncGpmZnNyZ3ZlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc2ODQ1NDUsImV4cCI6MjEwMzI2MDU0NX0.E6OIKpe9sejFEQX6PiMwsosoaxsHZ39jTqGMW9nI1G4';
+  // ═══════════════════════════════════════════════════════════════
+
+  const ADMIN_PIN = 'kujua@100';
+
+  const CATEGORIES = {
+    relationships: { label: 'Relationships', color: '#c44' },
+    mindset: { label: 'Mindset', color: '#36c' },
+    spirituality: { label: 'Spirituality', color: '#73c' },
+    career: { label: 'Career', color: '#2a2' },
+    'self-improvement': { label: 'Self-imp', color: '#666' },
+    family: { label: 'Family', color: '#a80' },
+    'mental-health': { label: 'Mental health', color: '#c00' },
+    other: { label: 'Other', color: '#999' }
+  };
+
+  // ── State ──
+  let supabaseClient = null;
+  let allQuestions = [];
+  let realtimeSub = null;
+
+  function initSupabase() {
+    try {
+      supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      return supabaseClient;
+    } catch (e) {
+      showToast('Failed to connect to Supabase');
+      console.error(e);
+      return null;
+    }
+  }
+
+  // ── Data layer ──
+  async function fetchQuestions() {
+    if (!supabaseClient) return [];
+    const { data, error } = await supabaseClient
+      .from('questions')
+      .select('*')
+      .order('created_at', { ascending: false });
+    if (error) { console.error(error); showToast('Error loading questions'); return []; }
+    allQuestions = data || [];
+    return allQuestions;
+  }
+
+  async function updateVotes(id, votes) {
+    if (!supabaseClient) return;
+    const { error } = await supabaseClient.from('questions').update({ votes }).eq('id', id);
+    if (error) console.error(error);
+  }
+
+  async function deleteQuestionDb(id) {
+    if (!supabaseClient) return;
+    const { error } = await supabaseClient.from('questions').delete().eq('id', id);
+    if (error) { console.error(error); showToast('Error deleting'); }
+  }
+
+  async function clearAllDb() {
+    if (!supabaseClient) return;
+    const { error } = await supabaseClient.from('questions').delete().neq('id', 'impossible');
+    if (error) { console.error(error); showToast('Error clearing data'); }
+  }
+
+  function subscribeToChanges() {
+    if (!supabaseClient) return;
+    realtimeSub = supabaseClient
+      .channel('questions_changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'questions' }, () => {
+        fetchQuestions().then(() => { if (isAdminVisible()) renderAdmin(); });
+      })
+      .subscribe();
+  }
+
+  // ── UI helpers ──
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+  }
+
+  function formatDate(ts) {
+    const d = new Date(ts);
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  }
+
+  function isThisWeek(ts) {
+    const now = new Date();
+    const startOfWeek = new Date(now);
+    startOfWeek.setDate(now.getDate() - now.getDay());
+    startOfWeek.setHours(0, 0, 0, 0);
+    return new Date(ts).getTime() >= startOfWeek.getTime();
+  }
+
+  function isAdminVisible() {
+    return document.getElementById('admin-content').style.display !== 'none';
+  }
+
+  // ── Admin ──
+  let currentFilter = 'all';
+
+  function searchDiscountCode() {
+    const input = document.getElementById('code-search-input').value.trim().toUpperCase();
+    const resultBox = document.getElementById('code-search-result');
+    if (!input) {
+      resultBox.innerHTML = '';
+      return;
+    }
+    const match = allQuestions.find(q => (q.discount_code || '').toUpperCase() === input);
+    if (!match) {
+      resultBox.innerHTML = `<div class="card" style="background:#fff5f5;border-color:#fbb;"><p style="font-size:13px;color:#c44;margin:0;">No question found with code "${escapeHtml(input)}".</p></div>`;
+      return;
+    }
+    const expired = match.discount_expires_at && new Date(match.discount_expires_at).getTime() < Date.now();
+    resultBox.innerHTML = `
+      <div class="card" style="background:#f5fff5;border-color:#bfb;">
+        <p style="font-size:13px;color:#666;margin:0 0 6px 0;"><strong>From:</strong> ${escapeHtml(match.name || 'Anonymous')}</p>
+        <p style="font-size:14px;margin:0 0 8px 0;">${escapeHtml(match.text)}</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+          <span class="tag tag-${match.category}">${CATEGORIES[match.category].label}</span>
+          <span style="font-size:12px;color:#666;">${formatDate(match.created_at)}</span>
+          <span style="font-size:12px;color:#666;">🔥 ${match.votes || 0} votes</span>
+          <span style="background:#111;color:#fff;padding:2px 8px;border-radius:6px;font-size:11px;">💰 ${match.discount_code}</span>
+          ${match.discount_expires_at ? `<span style="font-size:12px;color:${expired ? '#c44' : '#2a2'};">${expired ? 'Expired' : 'Expires'} ${new Date(match.discount_expires_at).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>` : ''}
+        </div>
+      </div>`;
+  }
+
+  function checkPin() {
+    const pin = document.getElementById('admin-pin').value;
+    if (pin === ADMIN_PIN) {
+      document.getElementById('admin-gate').style.display = 'none';
+      document.getElementById('admin-content').style.display = 'block';
+      renderAdmin();
+    } else {
+      showToast('Incorrect PIN');
+    }
+  }
+
+  async function renderAdmin() {
+    const qs = allQuestions.length ? allQuestions : await fetchQuestions();
+    const weekQs = qs.filter(q => isThisWeek(q.created_at));
+
+    document.getElementById('stat-total').textContent = qs.length;
+    document.getElementById('stat-week').textContent = weekQs.length;
+
+    const cats = new Set(qs.map(q => q.category));
+    document.getElementById('stat-categories').textContent = cats.size;
+
+    const catCounts = {};
+    qs.forEach(q => { catCounts[q.category] = (catCounts[q.category] || 0) + 1; });
+    const maxCount = Math.max(...Object.values(catCounts), 1);
+
+    let barsHtml = '';
+    Object.entries(CATEGORIES).forEach(([key, info]) => {
+      const count = catCounts[key] || 0;
+      const pct = (count / maxCount) * 100;
+      barsHtml += `<div class="category-bar"><span class="category-name">${info.label}</span><div class="category-track"><div class="category-fill" style="width: ${pct}%; background: ${info.color};"></div></div><span class="category-count">${count}</span></div>`;
+    });
+    document.getElementById('category-bars').innerHTML = barsHtml;
+
+    const scored = qs.map(q => {
+      const ageDays = (Date.now() - new Date(q.created_at).getTime()) / (1000 * 60 * 60 * 24);
+      const recencyScore = Math.max(0, 7 - ageDays) * 2;
+      return { ...q, score: (q.votes || 0) * 3 + recencyScore };
+    });
+    scored.sort((a, b) => b.score - a.score);
+    const top20 = scored.slice(0, 20);
+    document.getElementById('stat-top20').textContent = top20.length;
+
+    let topHtml = '';
+    if (top20.length === 0) {
+      topHtml = '<div class="empty-state">No questions yet. Share your link to collect submissions.</div>';
+    } else {
+      top20.forEach((q, i) => {
+        const rankClass = i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
+        topHtml += `<div class="top-question"><div class="top-rank ${rankClass}">${i + 1}</div><div class="top-content"><p class="top-text">${escapeHtml(q.text)}</p><div class="top-meta"><span class="tag tag-${q.category}">${CATEGORIES[q.category].label}</span><span>${formatDate(q.created_at)}</span>${q.discount_code ? `<span style="margin-left:auto;background:#111;color:#fff;padding:1px 6px;border-radius:4px;font-size:10px;">💰 ${q.discount_code}</span>` : ''}<span style="margin-left:auto;">🔥 ${Math.round(q.score)} pts</span></div></div></div>`;
+      });
+    }
+    document.getElementById('top20-list').innerHTML = topHtml;
+
+    renderQuestionsList();
+    document.getElementById('export-area').value = JSON.stringify(qs, null, 2);
+  }
+
+  function renderQuestionsList() {
+    const qs = allQuestions;
+    const filtered = currentFilter === 'all' ? qs : qs.filter(q => q.category === currentFilter);
+    filtered.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+    let html = '';
+    if (filtered.length === 0) {
+      html = '<div class="empty-state">No questions in this category.</div>';
+    } else {
+      filtered.forEach(q => {
+        html += `<div class="question-item"><div class="question-header"><p class="question-text">${escapeHtml(q.text)}</p></div><div class="question-meta"><span class="tag tag-${q.category}">${CATEGORIES[q.category].label}</span><span class="date-label">${formatDate(q.created_at)}</span>${q.discount_code ? `<span style="background:#111;color:#fff;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:500;">💰 ${q.discount_code}</span>` : ''}<button class="btn btn-secondary" style="padding: 2px 8px; font-size: 11px; margin-left: auto;" onclick="voteQuestion('${q.id}')">+1 priority</button><button class="btn btn-danger" style="padding: 2px 8px; font-size: 11px;" onclick="deleteQuestion('${q.id}')">Delete</button></div></div>`;
+      });
+    }
+    document.getElementById('questions-list').innerHTML = html;
+  }
+
+  function filterQuestions(cat) {
+    currentFilter = cat;
+    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+    event.target.classList.add('active');
+    renderQuestionsList();
+  }
+
+  async function voteQuestion(id) {
+    const qs = allQuestions;
+    const q = qs.find(x => x.id === id);
+    if (!q) return;
+    q.votes = (q.votes || 0) + 1;
+    await updateVotes(id, q.votes);
+    showToast('Priority boosted');
+    renderAdmin();
+  }
+
+  async function deleteQuestion(id) {
+    if (!confirm('Delete this question?')) return;
+    await deleteQuestionDb(id);
+    allQuestions = allQuestions.filter(q => q.id !== id);
+    showToast('Question deleted');
+    renderAdmin();
+  }
+
+  async function exportTop20() {
+    const qs = allQuestions;
+    const scored = qs.map(q => {
+      const ageDays = (Date.now() - new Date(q.created_at).getTime()) / (1000 * 60 * 60 * 24);
+      const recencyScore = Math.max(0, 7 - ageDays) * 2;
+      return { ...q, score: (q.votes || 0) * 3 + recencyScore };
+    });
+    scored.sort((a, b) => b.score - a.score);
+    const top20 = scored.slice(0, 20);
+
+    let text = `🎙️ Wednesday Live — Top 20 Questions\n${"=".repeat(40)}\n\n`;
+    top20.forEach((q, i) => { text += `${i + 1}. [${CATEGORIES[q.category].label}] ${q.text}\n`; });
+
+    navigator.clipboard.writeText(text).then(() => showToast('Top 20 copied!'));
+  }
+
+  function copyExport() {
+    navigator.clipboard.writeText(document.getElementById('export-area').value).then(() => showToast('JSON copied!'));
+  }
+
+  async function clearAll() {
+    if (!confirm('Delete ALL questions? This cannot be undone.')) return;
+    await clearAllDb();
+    allQuestions = [];
+    showToast('All data cleared');
+    renderAdmin();
+  }
+
+  function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  // ── Init ──
+  initSupabase();
+  fetchQuestions().then(() => subscribeToChanges());
+
+  document.getElementById('admin-pin')?.addEventListener('keypress', e => {
+    if (e.key === 'Enter') checkPin();
+  });
+</script>
+
+</body>
+</html>
